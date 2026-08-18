@@ -1,16 +1,12 @@
 # mermaid-skill —— 始终校验，仅限本地渲染
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/Agents365-ai/mermaid-skill?style=flat&logo=github)](https://github.com/Agents365-ai/mermaid-skill/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/Agents365-ai/mermaid-skill?style=flat&logo=github)](https://github.com/Agents365-ai/mermaid-skill/network/members)
-[![Latest Release](https://img.shields.io/github/v/release/Agents365-ai/mermaid-skill?logo=github)](https://github.com/Agents365-ai/mermaid-skill/releases/latest)
-[![Last Commit](https://img.shields.io/github/last-commit/Agents365-ai/mermaid-skill?logo=github)](https://github.com/Agents365-ai/mermaid-skill/commits/main)
+[![GitHub stars](https://img.shields.io/github/stars/robertonetresults/mermaid-skill?style=flat&logo=github)](https://github.com/robertonetresults/mermaid-skill/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/robertonetresults/mermaid-skill?style=flat&logo=github)](https://github.com/robertonetresults/mermaid-skill/network/members)
+[![Last Commit](https://img.shields.io/github/last-commit/robertonetresults/mermaid-skill?logo=github)](https://github.com/robertonetresults/mermaid-skill/commits/main)
 
-[![SkillsMP](https://img.shields.io/badge/SkillsMP-listed-1f6feb)](https://skillsmp.com/skills/agents365-ai-mermaid-skill-skills-mermaid-skill-skill-md)
-[![ClawHub](https://img.shields.io/badge/ClawHub-listed-ff6b35)](https://clawhub.ai/agents365-ai/mermaid-pro-skill)
-[![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-plugin-8a2be2)](https://github.com/Agents365-ai/365-skills)
 [![Agent Skills](https://img.shields.io/badge/Agent%20Skills-兼容-2ea44f)](https://agentskills.io)
-[English](README.md) · **中文** · [📖 在线文档](https://agents365-ai.github.io/mermaid-skill/zh.html)
+[English](README.md) · **中文** · [文档](docs/zh.html)
 
 一个把自然语言转成始终经过校验的 `.mmd` 源码的技能。只有用户明确指定格式时才导出 PNG / SVG / PDF，并且只使用本地 `mmdc`、禁用网络的本地 Mermaid CLI 容器或仅监听回环地址的 Kroki 容器 API。
 
@@ -71,28 +67,42 @@ Mermaid 自动布局 17+ 种类型 —— 下面每张都由一句提示词生�
 
 技能按上述顺序探测后端，绝不自动安装软件、拉取镜像或调用托管渲染器。配置见[本地渲染说明](skills/mermaid-skill/reference/LOCAL-RENDERING.md)。
 
-### 2. 安装技能
+### 2. 克隆本 fork 并为 Codex 安装
 
 ```bash
-# 任意 Agent(Claude Code、Cursor、Copilot 等)
-npx skills add Agents365-ai/365-skills -g
+git clone git@github.com:robertonetresults/mermaid-skill.git
+cd mermaid-skill
+./manage-skill.sh install
 ```
 
-```text
-# Claude Code 插件市场
-> /plugin marketplace add Agents365-ai/365-skills
-> /plugin install mermaid
-```
+如果不能使用 SSH，可改用 `https://github.com/robertonetresults/mermaid-skill.git`。默认安装到 `${CODEX_HOME:-$HOME/.codex}/skills/mermaid-skill`；请保留 clone，它也是后续更新的来源。
+
+### 3. 更新或卸载
 
 ```bash
-# 手动安装
-git clone https://github.com/Agents365-ai/mermaid-skill.git \
-  ~/.claude/skills/mermaid-skill
+# 从当前本地 checkout 重新安装（不访问网络）
+./manage-skill.sh update
+
+# 仅快进更新配置的 Git remote，然后重新安装
+./manage-skill.sh update --pull
+
+# 只删除由此安装器管理的安装目录
+./manage-skill.sh uninstall
 ```
 
-同时索引于 [SkillsMP](https://skillsmp.com/skills/agents365-ai-mermaid-skill-skills-mermaid-skill-skill-md) 与 [ClawHub](https://clawhub.ai/agents365-ai/mermaid-pro-skill)。
+脚本拒绝覆盖或删除没有所有权标记的现有目录。
 
-**更新:** `/plugin update mermaid`(Claude Code)、`skills update mermaid-skill`(SkillsMP)、`clawhub update mermaid-pro-skill`(OpenClaw),或 `git pull`(手动安装)。
+### 其他兼容 Agent Skills 的智能体
+
+本 skill 使用开放的 Agent Skills 目录格式。可以安装到跨客户端的用户目录、项目目录，或指定其他 agent 的 skills 目录：
+
+```bash
+./manage-skill.sh install --agents
+./manage-skill.sh install --project /path/to/project
+./manage-skill.sh install --destination /path/to/agent/skills
+```
+
+更新和卸载时使用相同的目标选项。不同 agent 的发现目录可能不同，因此只保证 Codex；安装后请重启 agent 或开始新会话。
 
 ## ⚡ 快速开始
 

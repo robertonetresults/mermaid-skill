@@ -13,7 +13,7 @@
   <meta property="og:description" content="生成始终经过校验的 Mermaid 源码，并仅在明确要求时通过本地后端导出 PNG/SVG/PDF。">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://agents365-ai.github.io/mermaid-skill/zh.html">
-  <meta property="og:image" content="https://raw.githubusercontent.com/Agents365-ai/mermaid-skill/main/assets/example.png">
+  <meta property="og:image" content="https://raw.githubusercontent.com/robertonetresults/mermaid-skill/main/assets/example.png">
   <meta name="twitter:card" content="summary_large_image">
   <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -115,22 +115,11 @@ section + section { border-top: 1px solid var(--border); }
 .feature-card h3 { font-size: 18px; margin-bottom: 8px; }
 .feature-card p { color: var(--text-muted); font-size: 14px; }
 
-.tabs { display: flex; gap: 0; margin-bottom: 0; flex-wrap: wrap; }
-.tab {
-  padding: 10px 20px; background: var(--bg-card); border: 1px solid var(--border);
-  border-bottom: none; color: var(--text-muted); cursor: pointer;
-  font-size: 14px; font-weight: 500; transition: all 0.2s;
-  font-family: inherit;
+.install-block {
+  background: var(--bg-code); border: 1px solid var(--border);
+  border-radius: 8px; padding: 20px;
 }
-.tab:first-child { border-radius: 8px 0 0 0; }
-.tab:last-child { border-radius: 0 8px 0 0; }
-.tab.active { background: var(--bg-code); color: var(--text); border-bottom-color: var(--bg-code); }
-.tab-content {
-  display: none; background: var(--bg-code); border: 1px solid var(--border);
-  border-radius: 0 8px 8px 8px; padding: 20px;
-}
-.tab-content.active { display: block; }
-.tab-content pre {
+.install-block pre {
   font-family: 'SF Mono', 'Fira Code', monospace; font-size: 14px;
   line-height: 1.5; white-space: pre-wrap; color: var(--green);
 }
@@ -197,20 +186,17 @@ footer a:hover { color: var(--text); }
       <h1>mermaid-<span>skill</span></h1>
       <p>生成并始终校验 Mermaid 源码；只有明确要求时才使用本地后端导出 PNG / SVG / PDF。</p>
       <div class="hero-install">
-        <code id="install-cmd">/plugin marketplace add Agents365-ai/365-skills</code>
+        <code id="install-cmd">git clone https://github.com/robertonetresults/mermaid-skill.git &amp;&amp; cd mermaid-skill &amp;&amp; ./manage-skill.sh install</code>
         <button class="copy-btn" data-copied="已复制!" onclick="copyInstall()">复制</button>
       </div>
       <div class="hero-links">
-        <a href="https://github.com/Agents365-ai/mermaid-skill" class="btn btn-primary">GitHub</a>
-        <a href="https://clawhub.ai/agents365-ai/mermaid-pro-skill" class="btn btn-outline">ClawHub</a>
-        <a href="https://skillsmp.com/skills/agents365-ai-mermaid-skill-skills-mermaid-skill-skill-md" class="btn btn-outline">SkillsMP</a>
-        <a href="https://discord.gg/79JF5Atuk" class="btn btn-outline">Discord</a>
+        <a href="https://github.com/robertonetresults/mermaid-skill" class="btn btn-primary">GitHub fork</a>
       </div>
       <div style="margin-top:56px;">
-        <img src="https://raw.githubusercontent.com/Agents365-ai/mermaid-skill/main/assets/example.png"
+        <img src="../assets/example.png"
              alt="mermaid-skill 用一条自然语言提示词生成的微服务架构图"
              style="width:100%;max-width:920px;height:auto;border-radius:12px;border:1px solid var(--border);box-shadow:0 8px 32px rgba(0,0,0,0.3);">
-        <p style="margin-top:14px;font-size:13px;color:var(--text-muted);">来自一条自然语言提示词 &mdash; 完整提示词见 <a href="https://github.com/Agents365-ai/mermaid-skill/blob/main/README_CN.md#%EF%B8%8F-%E7%A4%BA%E4%BE%8B">中文 README</a>。</p>
+        <p style="margin-top:14px;font-size:13px;color:var(--text-muted);">来自一条自然语言提示词 &mdash; 完整提示词见 <a href="https://github.com/robertonetresults/mermaid-skill/blob/main/README_CN.md#%EF%B8%8F-%E7%A4%BA%E4%BE%8B">中文 README</a>。</p>
       </div>
     </div>
   </div>
@@ -256,37 +242,19 @@ footer a:hover { color: var(--text); }
   <section>
     <div class="container">
       <h2 class="section-title">安装</h2>
-      <p class="section-sub">选择你的平台,只要 10 秒。</p>
-      <div class="tabs" role="tablist" aria-label="Installation platforms">
-        <button class="tab active" role="tab" aria-selected="true" aria-controls="tab-claude" onclick="switchTab(event, 'tab-claude')">Claude Code</button>
-<button class="tab" role="tab" aria-selected="false" aria-controls="tab-opencode" onclick="switchTab(event, 'tab-opencode')">Opencode</button>
-<button class="tab" role="tab" aria-selected="false" aria-controls="tab-openclaw" onclick="switchTab(event, 'tab-openclaw')">OpenClaw</button>
-<button class="tab" role="tab" aria-selected="false" aria-controls="tab-skillsmp" onclick="switchTab(event, 'tab-skillsmp')">SkillsMP</button>
-<button class="tab" role="tab" aria-selected="false" aria-controls="tab-codex" onclick="switchTab(event, 'tab-codex')">Codex</button>
-      </div>
-      <div id="tab-claude" class="tab-content active" role="tabpanel"><pre># Plugin marketplace (recommended)
-/plugin marketplace add Agents365-ai/365-skills
-/plugin install mermaid
+      <p class="section-sub">Codex 是默认目标，不需要 marketplace 或发布门户。</p>
+      <div class="install-block"><pre># 克隆本 fork 并为 Codex 安装
+git clone git@github.com:robertonetresults/mermaid-skill.git
+cd mermaid-skill
+./manage-skill.sh install
 
-# Or any agent
-npx skills add Agents365-ai/365-skills -g
+# 从 checkout 更新，也可先执行 fast-forward pull
+./manage-skill.sh update
+./manage-skill.sh update --pull
 
-# Manual install
-git clone https://github.com/Agents365-ai/mermaid-skill.git ~/.claude/skills/mermaid-skill</pre></div>
-<div id="tab-opencode" class="tab-content" role="tabpanel"><pre># Global
-git clone https://github.com/Agents365-ai/mermaid-skill.git ~/.config/opencode/skills/mermaid-skill
-
-# Project
-git clone https://github.com/Agents365-ai/mermaid-skill.git .opencode/skills/mermaid-skill</pre></div>
-<div id="tab-openclaw" class="tab-content" role="tabpanel"><pre># Global
-git clone https://github.com/Agents365-ai/mermaid-skill.git ~/.openclaw/skills/mermaid-skill</pre></div>
-<div id="tab-skillsmp" class="tab-content" role="tabpanel"><pre># Via SkillsMP CLI
-skills install mermaid-skill</pre></div>
-<div id="tab-codex" class="tab-content" role="tabpanel"><pre># User-level
-git clone https://github.com/Agents365-ai/mermaid-skill.git ~/.agents/skills/mermaid-skill
-
-# Project-level
-git clone https://github.com/Agents365-ai/mermaid-skill.git .agents/skills/mermaid-skill</pre></div>
+# 跨 agent 目录约定或卸载
+./manage-skill.sh install --agents
+./manage-skill.sh uninstall</pre></div>
     </div>
   </section>
 
@@ -357,7 +325,7 @@ git clone https://github.com/Agents365-ai/mermaid-skill.git .agents/skills/merma
 
   <footer>
     <div class="container">
-      <p><a href="https://github.com/Agents365-ai/mermaid-skill/blob/main/LICENSE">MIT 协议</a> &middot; <a href="https://github.com/Agents365-ai/mermaid-skill">GitHub</a> &middot; <a href="https://github.com/Agents365-ai">Agents365-ai</a></p>
+      <p><a href="https://github.com/robertonetresults/mermaid-skill/blob/main/LICENSE">MIT 协议</a> &middot; <a href="https://github.com/robertonetresults/mermaid-skill">GitHub fork</a> &middot; 上游作者 <a href="https://github.com/Agents365-ai">Agents365-ai</a></p>
     </div>
   </footer>
 
@@ -370,13 +338,6 @@ function copyInstall() {
     btn.textContent = btn.dataset.copied || 'Copied!';
     setTimeout(() => btn.textContent = original, 2000);
   });
-}
-function switchTab(e, id) {
-  document.querySelectorAll('.tab').forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  e.target.classList.add('active');
-  e.target.setAttribute('aria-selected', 'true');
-  document.getElementById(id).classList.add('active');
 }
 function toggleTheme() {
   const html = document.documentElement;

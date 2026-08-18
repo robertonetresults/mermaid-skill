@@ -1,16 +1,12 @@
 # mermaid-skill — Validated Diagrams, Local-Only Rendering
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/Agents365-ai/mermaid-skill?style=flat&logo=github)](https://github.com/Agents365-ai/mermaid-skill/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/Agents365-ai/mermaid-skill?style=flat&logo=github)](https://github.com/Agents365-ai/mermaid-skill/network/members)
-[![Latest Release](https://img.shields.io/github/v/release/Agents365-ai/mermaid-skill?logo=github)](https://github.com/Agents365-ai/mermaid-skill/releases/latest)
-[![Last Commit](https://img.shields.io/github/last-commit/Agents365-ai/mermaid-skill?logo=github)](https://github.com/Agents365-ai/mermaid-skill/commits/main)
+[![GitHub stars](https://img.shields.io/github/stars/robertonetresults/mermaid-skill?style=flat&logo=github)](https://github.com/robertonetresults/mermaid-skill/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/robertonetresults/mermaid-skill?style=flat&logo=github)](https://github.com/robertonetresults/mermaid-skill/network/members)
+[![Last Commit](https://img.shields.io/github/last-commit/robertonetresults/mermaid-skill?logo=github)](https://github.com/robertonetresults/mermaid-skill/commits/main)
 
-[![SkillsMP](https://img.shields.io/badge/SkillsMP-listed-1f6feb)](https://skillsmp.com/skills/agents365-ai-mermaid-skill-skills-mermaid-skill-skill-md)
-[![ClawHub](https://img.shields.io/badge/ClawHub-listed-ff6b35)](https://clawhub.ai/agents365-ai/mermaid-pro-skill)
-[![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-plugin-8a2be2)](https://github.com/Agents365-ai/365-skills)
 [![Agent Skills](https://img.shields.io/badge/Agent%20Skills-compatible-2ea44f)](https://agentskills.io)
-**English** · [中文](README_CN.md) · [📖 Online Docs](https://agents365-ai.github.io/mermaid-skill/)
+**English** · [中文](README_CN.md) · [Documentation](docs/index.html)
 
 A skill that turns natural-language requests into always-validated `.mmd` source. PNG / SVG / PDF export is opt-in and uses only local `mmdc`, a network-isolated local Mermaid CLI container, or a loopback-only Kroki container API.
 
@@ -71,28 +67,42 @@ Full feature matrix in [docs/features.md](docs/features.md). Source `.mmd` files
 
 The skill probes these backends in order. It never installs packages, pulls images, or calls a hosted renderer. See [local rendering setup](skills/mermaid-skill/reference/LOCAL-RENDERING.md).
 
-### 2. Install the skill
+### 2. Clone this fork and install for Codex
 
 ```bash
-# Any agent (Claude Code, Cursor, Copilot, ...)
-npx skills add Agents365-ai/365-skills -g
+git clone git@github.com:robertonetresults/mermaid-skill.git
+cd mermaid-skill
+./manage-skill.sh install
 ```
 
-```text
-# Claude Code plugin marketplace
-> /plugin marketplace add Agents365-ai/365-skills
-> /plugin install mermaid
-```
+If SSH access is unavailable, clone `https://github.com/robertonetresults/mermaid-skill.git` instead. The default destination is `${CODEX_HOME:-$HOME/.codex}/skills/mermaid-skill`; keep the clone because it remains the source for future updates.
+
+### 3. Update or uninstall
 
 ```bash
-# Manual install
-git clone https://github.com/Agents365-ai/mermaid-skill.git \
-  ~/.claude/skills/mermaid-skill
+# Reinstall from the current local checkout (no network)
+./manage-skill.sh update
+
+# Fast-forward the configured Git remote, then reinstall
+./manage-skill.sh update --pull
+
+# Remove only the installation owned by this installer
+./manage-skill.sh uninstall
 ```
 
-Also indexed on [SkillsMP](https://skillsmp.com/skills/agents365-ai-mermaid-skill-skills-mermaid-skill-skill-md) and [ClawHub](https://clawhub.ai/agents365-ai/mermaid-pro-skill).
+The script refuses to overwrite or remove an existing directory that does not contain its ownership marker.
 
-**Updating:** `/plugin update mermaid` (Claude Code), `skills update mermaid-skill` (SkillsMP), `clawhub update mermaid-pro-skill` (OpenClaw), or `git pull` for manual installs.
+### Other skills-compatible agents
+
+The skill follows the open Agent Skills directory format. Install it in the cross-client user or project convention, or provide an agent-specific directory:
+
+```bash
+./manage-skill.sh install --agents
+./manage-skill.sh install --project /path/to/project
+./manage-skill.sh install --destination /path/to/agent/skills
+```
+
+Use the same target option with `update` and `uninstall`. Agent discovery paths vary, so only Codex is guaranteed; restart the agent or begin a new session after installation.
 
 ## ⚡ Quick Start
 
