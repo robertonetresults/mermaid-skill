@@ -1,22 +1,20 @@
-flowchart TD
-  Start([User requests diagram]):::input --> CheckDeps{Check deps}:::decision
-
-  CheckDeps -->|mmdc available| UseMmdc[Use mmdc locally]:::process
-  CheckDeps -->|mmdc unavailable| UseKroki[Use Kroki API]:::process
-
-  UseMmdc --> PickType
-  UseKroki --> PickType
-
-  PickType[Pick diagram type]:::process --> Generate[Generate .mmd file]:::process
-
-  Generate --> Validate{Validate syntax}:::decision
-
-  Validate -->|Error| Fix[Fix .mmd file]:::warning
+flowchart LR
+  Start([User requests diagram]):::input --> Generate[Generate .mmd source]:::process
+  Generate --> Local{Local mmdc works?}:::decision
+  Local -->|Yes| Validate[Validate with temporary SVG]:::process
+  Local -->|No| Container{Local CLI container works?}:::decision
+  Container -->|Yes| Validate
+  Container -->|No| Kroki{Loopback Kroki works?}:::decision
+  Kroki -->|Yes| Validate
+  Kroki -->|No| Unvalidated([Report source as not validated]):::warning
+  Validate --> Result{Syntax valid?}:::decision
+  Result -->|No| Fix[Fix .mmd source]:::warning
   Fix --> Validate
-
-  Validate -->|Pass| Export[Export PNG/SVG/PDF]:::process
-
-  Export --> Report([Report output paths]):::output
+  Result -->|Yes| Export{Format explicitly requested?}:::decision
+  Export -->|No| Source([Report validated .mmd]):::output
+  Export -->|Yes| Render[Export requested formats only]:::process
+  Render --> Review[Inspect requested artifacts]:::process
+  Review --> Report([Report output paths]):::output
 
   classDef input fill:#d4edda,stroke:#28a745,color:#155724
   classDef process fill:#cce5ff,stroke:#007bff,color:#004085

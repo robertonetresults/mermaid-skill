@@ -1,151 +1,142 @@
 ---
 name: mermaid-skill
-description: Generate Mermaid diagrams (.mmd) and export to PNG/SVG/PDF using mmdc CLI or Kroki API. USE THIS SKILL when user mentions diagram, flowchart, sequence diagram, class diagram, ER diagram, state machine, architecture, visualize, git graph, 画图, 架构图, 流程图, 时序图. PROACTIVELY USE when explaining ANY system with 3+ components, API flows, authentication sequences, class hierarchies, database schemas, or state machines. Supports 17+ diagram types with fully automatic layout.
-homepage: https://github.com/Agents365-ai/creating-mermaid-diagrams
-version: 1.1.0
-metadata: {"openclaw":{"requires":{"bins":["curl"]},"emoji":"📊"}}
+description: >-
+  Generate and always validate Mermaid diagram sources (.mmd), and export
+  PNG/SVG/PDF only when explicitly requested. Use for diagrams, flowcharts,
+  sequence diagrams, class diagrams, ER diagrams, state machines,
+  architectures, Git graphs, timelines, mind maps, and visual explanations of
+  systems with three or more components. All validation and rendering must
+  remain local: prefer local mmdc, then a local Mermaid CLI container, then a
+  loopback-only Kroki container API.
 ---
 
 # Mermaid Diagrams
 
-Generate `.mmd` text files and export to PNG/SVG/PDF using `mmdc` (local) or Kroki API (no install).
+Create version-control-friendly `.mmd` files with automatic layout. Always validate the source, but export a persistent PNG, SVG, or PDF only when the user explicitly requests that format.
 
-**Key advantage:** Text-based syntax with **fully automatic layout** — no x/y coordinates needed.
+## Security invariants
 
-## When to use / when NOT to use
+- Never send diagram source, labels, configuration, or rendered artifacts to a public service.
+- Never call `kroki.io`, `mermaid.live`, another hosted renderer, or an arbitrary HTTP endpoint.
+- Never install a package, pull a container image, or use `npx` as an implicit fallback.
+- Reject Mermaid source that references external resources or URLs before validation or export.
+- Accept Kroki only over plain HTTP on loopback (`127.0.0.1`, `localhost`, or `::1`). Do not follow redirects or use a proxy.
+- Run the Mermaid CLI container with networking disabled and pulling disabled.
 
-**Use this skill for:** diagrams-as-code with automatic layout (flowchart, sequence, class, state, ER, gantt, mindmap, architecture) — text source that lives in git and embeds in Markdown.
+Read [reference/LOCAL-RENDERING.md](reference/LOCAL-RENDERING.md) when setting up or troubleshooting a rendering backend.
 
-**Do NOT use it — route elsewhere — for:**
+## When to use / when not to use
 
-- Pixel-precise placement, custom layout, branded icons, or heavy styling → **drawio**.
-- A hand-drawn / sketchy aesthetic → **excalidraw** or **tldraw**.
-- A freeform whiteboard or freehand strokes → **tldraw**.
-- Strict, conventional UML notation → **plantuml**.
+Use this skill for diagrams-as-code with automatic layout: flowcharts, sequences, classes, states, ER models, Gantt charts, mind maps, and architectures.
 
-## Prerequisites
+Use another format for pixel-precise placement, heavy branding, freehand drawing, or strict conventional UML notation.
 
-**Option A: Local (mmdc)** — also needs a headless Chrome (mmdc renders via Puppeteer)
+## Required workflow
 
-```bash
-npm install -g @mermaid-js/mermaid-cli
-npx puppeteer browsers install chrome-headless-shell   # required — mmdc has no bundled browser
-mmdc --version
-```
+1. Choose the diagram type.
+2. Write the `.mmd` source to disk.
+3. Run `scripts/render-mermaid.sh validate diagram.mmd`.
+4. If validation reports a Mermaid syntax error, make the smallest source correction and validate again. Repeat until validation succeeds or the source cannot be corrected.
+5. If no backend is available, keep the `.mmd` file, clearly report that it is **not validated**, and do not claim success.
+6. If the user did not explicitly request PNG, SVG, or PDF, stop after successful validation and report only the `.mmd` path.
+7. If the user explicitly requested one or more formats, run `scripts/render-mermaid.sh export diagram.mmd diagram.<format>` once per requested format.
+8. Inspect only the requested artifacts. Re-validate and re-export after every source correction.
 
-> `mmdc --version` succeeds even with **no** Chrome installed, but every export then fails with `Could not find Chrome`. Install the browser above (or set `PUPPETEER_EXECUTABLE_PATH` to a system Chrome). If you can't, use Kroki (Option B) — it needs no browser.
+If the user asks for an image or export without naming a format, ask whether they want PNG, SVG, or PDF. Do not infer PNG.
 
-**Option B: Kroki API (no install)**
+### Backend order
 
-```bash
-curl --version  # Just need curl
-```
+The helper enforces this order for both validation and export:
 
-## Workflow
+1. A working local `mmdc` executable.
+2. Docker or Podman with the already-local `minlag/mermaid-cli:latest` image (or the approved image in `MERMAID_CLI_IMAGE`).
+3. The local Kroki API configured by `KROKI_URL`, defaulting to `http://127.0.0.1:8000`.
 
-1. **Check deps** — `mmdc --version` **and** confirm a headless Chrome is installed (a bare `--version` pass does NOT mean export works); fall back to Kroki if either is missing
-2. **Pick diagram type** — choose from table below
-3. **Generate** — write `.mmd` file to disk
-4. **Validate** — run validation (REQUIRED before export)
-5. **Export** — use `mmdc` or Kroki API to produce PNG/SVG/PDF
-6. **Self-check (vision)** — read the exported PNG and fix readability/layout defects that automatic layout can't prevent (clipped labels, cramped density, wrong orientation), then re-validate + re-export. Max 2 rounds; skip if no vision. See **Self-Check (vision)** below.
-7. **Review loop** — show the image to the user, apply the minimal `.mmd` edit per request, re-export until approved (5-round safety valve). See **Review Loop** below.
-8. **Report** — tell user the output file paths
+Backend probes use a harmless built-in diagram. A Mermaid error in the user's source is not backend unavailability: fix the source and re-validate with the same selected backend.
 
-## Validation (Required)
+Kroki supports Mermaid PNG and SVG, but not PDF. If both `mmdc` backends are unavailable, report PDF export as unavailable; never use a remote converter.
 
-**NEVER export a diagram without validating first.**
+## Validation
 
-```bash
-# Validate with mmdc (local)
-mmdc -i diagram.mmd -o /tmp/test.png 2>&1
+Validation is mandatory even when no export was requested. The helper renders an SVG into a temporary directory, removes it automatically, and never presents it as user output.
 
-# Validate with Kroki (if mmdc unavailable)
-curl -s -X POST -H "Content-Type: text/plain" --data-binary @diagram.mmd https://kroki.io/mermaid/svg -o /tmp/test.svg && echo "Valid" || echo "Invalid"
+Common syntax corrections:
 
-# If error, fix the .mmd file and validate again
-# Only proceed to export after validation passes
-```
+- Quote labels containing punctuation or special characters.
+- Use `->>` and `-->>` in sequence diagrams; use `-->` in flowcharts.
+- Declare sequence participants explicitly.
+- Quote subgraph names containing spaces.
 
-Common validation errors:
+A Chrome/Puppeteer failure is a backend setup problem, not a diagram error. Let the helper select the next local backend rather than rewriting valid Mermaid syntax.
 
-- Missing quotes around labels with special characters
-- Wrong arrow syntax (use `->>` for sequence, `-->` for flowchart)
-- Undeclared participants in sequence diagrams
+## Self-check (vision)
 
-> A `Could not find Chrome` (or puppeteer) error from `mmdc` is a **setup** problem, not a diagram error — the `.mmd` may be perfectly valid. Install the browser (see Prerequisites) or validate via Kroki instead of "fixing" correct syntax.
-
-## Self-Check (vision)
-
-Validation (above) only proves the syntax is legal — it says nothing about whether the **rendered** diagram is readable. After exporting, use the agent's vision capability to read the PNG and catch what automatic layout can't prevent. Mermaid positions everything itself, so the failures here are about content and readability, **not** overlaps:
+Syntax validation does not prove that a rendered diagram is readable. When the user explicitly requested PNG and vision is available, inspect that PNG after export:
 
 | Check | What to look for | Fix |
 | --- | --- | --- |
-| Label truncation | Node / edge text clipped or cut off | Shorten the label, or wrap it with `<br/>` |
-| Cramped, unreadable density | Too many nodes crammed together; tangled lines | Flip direction (`TD`↔`LR`), split into `subgraph`s, or reduce nodes |
-| Wrong orientation / aspect | Diagram far too wide or too tall to read | Change `flowchart TD`↔`LR` (or set `direction` in class/state) |
-| Edge spaghetti | Many edges crossing, hard to follow | Reorder node declarations so connected nodes sit adjacent; group with `subgraph` |
-| Wrong diagram type | Type doesn't suit the content (e.g. flowchart for a timeline) | Switch type (`gantt`, `sequenceDiagram`, `stateDiagram-v2`, …) |
-| Low contrast | Text blends into the node fill | Adjust `classDef` / theme so text contrasts the fill |
+| Label truncation | Node or edge text is clipped | Shorten the label or wrap it with `<br/>` |
+| Cramped density | Too many nodes or tangled lines | Flip `TD`↔`LR`, introduce `subgraph`s, or reduce nodes |
+| Wrong orientation | Diagram is far too wide or tall | Change flowchart direction or set `direction` for class/state diagrams |
+| Edge spaghetti | Crossings make relationships hard to follow | Reorder declarations and group related nodes |
+| Wrong diagram type | The notation does not fit the content | Switch to sequence, Gantt, state, or another suitable type |
+| Low contrast | Text blends into node fills | Adjust `classDef` or the Mermaid theme |
 
-- Max **2 self-check rounds** — if issues remain after 2 fixes, show the user anyway.
-- **Re-validate (syntax) and re-export after every fix.**
-- If vision is unavailable, skip self-check and show the PNG directly.
+- Perform at most two automatic self-check corrections.
+- Re-validate the `.mmd` and re-export only the requested formats after every correction.
+- If vision is unavailable, report the requested PNG without claiming that it was visually checked.
+- Never create an extra PNG solely to inspect an SVG or PDF request.
 
-## Review Loop
+## Review loop
 
-After self-check, show the exported image and collect feedback. Apply the **minimal `.mmd` edit** for each request, then re-validate and re-export:
+After self-check, show or report the requested artifacts and collect feedback. Apply the smallest relevant `.mmd` edit:
 
 | User request | Edit action |
 | --- | --- |
-| Change a label | Edit the node / edge text in the `.mmd` |
-| Add / remove a node or edge | Add or delete the matching line |
-| Change a color | Add / adjust a `classDef` and `class <node> <className>` |
-| Change layout direction | Swap `TD`↔`LR` (flowchart) or set `direction` (class / state) |
-| Restructure / group | Wrap related nodes in a `subgraph`, or regenerate |
+| Change a label | Edit the node or edge text |
+| Add or remove a node or edge | Add or delete the matching declaration |
+| Change a color | Adjust `classDef` and the corresponding `class` assignment |
+| Change layout direction | Swap `TD`↔`LR` or set `direction` for class/state diagrams |
+| Restructure or group | Wrap related nodes in a `subgraph` or regenerate the affected section |
 
-- Overwrite the same `diagram.mmd` / `diagram.png` each round — don't create `v1`, `v2`, …
-- **Safety valve:** after 5 rounds, suggest the user fine-tune at [mermaid.live](https://mermaid.live).
+After every edit, validate again and re-export every format originally requested by the user. Overwrite the same `.mmd` and output files rather than creating `v1`, `v2`, and similar variants. Stop the review loop after five rounds and report any remaining limitation; never redirect the user to a public editor or renderer.
 
-## Diagram Types
+## Diagram types
 
 | Type | Keyword | Use for |
-| ------ | --------- | --------- |
-| Flowchart | `flowchart TD/LR` | processes, pipelines, decisions |
+| --- | --- | --- |
+| Flowchart | `flowchart TD/LR` | Processes, pipelines, decisions |
 | Sequence | `sequenceDiagram` | API calls, message passing |
 | Class | `classDiagram` | OOP models, data structures |
-| ER | `erDiagram` | database schemas |
-| State | `stateDiagram-v2` | state machines, lifecycle |
-| Gantt | `gantt` | project timelines |
-| Pie | `pie` | proportions |
-| Git Graph | `gitGraph` | branch strategies |
-| C4 Context | `C4Context` | high-level system context |
-| Architecture | `architecture-beta` | cloud / CI/CD service layouts |
-| Mind Map | `mindmap` | topic breakdowns |
-| User Journey | `journey` | user-experience flows |
-| Use Case | `usecase-beta` | actor–system interactions (UML) |
-| Cynefin | `cynefin-beta` | sense-making / complexity domains |
-| Event Modeling | `eventmodeling` | event-driven system timelines |
-| Tree View | `treeView-beta` | file / directory hierarchies |
-| Wardley Maps | `wardley-beta` | business strategy / value chains |
+| ER | `erDiagram` | Database schemas |
+| State | `stateDiagram-v2` | State machines and lifecycles |
+| Gantt | `gantt` | Project timelines |
+| Pie | `pie` | Proportions |
+| Git Graph | `gitGraph` | Branch strategies |
+| C4 Context | `C4Context` | High-level system context |
+| Architecture | `architecture-beta` | Cloud and CI/CD layouts |
+| Mind Map | `mindmap` | Topic breakdowns |
+| User Journey | `journey` | User-experience flows |
+| Use Case | `usecase-beta` | Actor-system interactions |
+| Cynefin | `cynefin-beta` | Complexity domains |
+| Event Modeling | `eventmodeling` | Event-driven timelines |
+| Tree View | `treeView-beta` | File and directory hierarchies |
+| Wardley Maps | `wardley-beta` | Strategy and value chains |
 
-## Syntax Reference
+## Syntax references
 
-**Flowchart**: See [reference/FLOWCHART.md](reference/FLOWCHART.md)
-**Sequence**: See [reference/SEQUENCE.md](reference/SEQUENCE.md)
-**Class & ER**: See [reference/CLASS-ER.md](reference/CLASS-ER.md)
-**Architecture**: See [reference/ARCHITECTURE.md](reference/ARCHITECTURE.md)
-**Use Case**: See [reference/USECASE.md](reference/USECASE.md)
-**Other types**: See [reference/OTHER-TYPES.md](reference/OTHER-TYPES.md)
+- Flowchart: [reference/FLOWCHART.md](reference/FLOWCHART.md)
+- Sequence: [reference/SEQUENCE.md](reference/SEQUENCE.md)
+- Class and ER: [reference/CLASS-ER.md](reference/CLASS-ER.md)
+- Architecture: [reference/ARCHITECTURE.md](reference/ARCHITECTURE.md)
+- Use case: [reference/USECASE.md](reference/USECASE.md)
+- Other types: [reference/OTHER-TYPES.md](reference/OTHER-TYPES.md)
 
 ## Examples
 
-### Example 1: API Authentication Flow
+### Example 1: API authentication flow
 
-**User prompt:**
-> Create a sequence diagram for JWT authentication
-
-**Generated `.mmd`:**
+**User prompt:** “Create a sequence diagram for JWT authentication.”
 
 ```mermaid
 sequenceDiagram
@@ -154,25 +145,20 @@ sequenceDiagram
   participant A as Auth Service
   participant D as Database
 
-  C->>G: POST /login {email, password}
-  G->>A: validate(credentials)
-  A->>D: SELECT user WHERE email=?
+  C->>G: POST /login with credentials
+  G->>A: validate credentials
+  A->>D: find user
   D-->>A: user record
   A-->>A: verify password hash
-  A-->>G: 200 OK + JWT token
-  G-->>C: {token: "eyJhbG..."}
+  A-->>G: signed JWT
+  G-->>C: token
 ```
 
-**Output files:** `auth-flow.mmd` + `auth-flow.png`
+Validate with the fix-and-re-validate loop. Because no format was requested, report only the validated `auth-flow.mmd`.
 
----
+### Example 2: Microservices architecture
 
-### Example 2: Microservices Architecture
-
-**User prompt:**
-> Draw an e-commerce microservices architecture
-
-**Generated `.mmd`:**
+**User prompt:** “Draw an e-commerce microservices architecture.”
 
 ```mermaid
 flowchart TD
@@ -194,7 +180,7 @@ flowchart TD
     UDB[(User DB)]
     ODB[(Order DB)]
     PDB[(Product DB)]
-    REDIS[(Redis Cache)]
+    CACHE[(Redis Cache)]
   end
 
   M & W --> GW
@@ -202,41 +188,31 @@ flowchart TD
   US --> UDB
   OS --> ODB
   PS --> PDB
-  PAY --> REDIS
+  PAY --> CACHE
 ```
 
-**Output files:** `ecommerce-arch.mmd` + `ecommerce-arch.png`
+Validate and report only `ecommerce-architecture.mmd`; “draw” does not implicitly select an export format.
 
----
+### Example 3: Order state machine
 
-### Example 3: Order State Machine
-
-**User prompt:**
-> Show order lifecycle states
-
-**Generated `.mmd`:**
+**User prompt:** “Show the order lifecycle states.”
 
 ```mermaid
 stateDiagram-v2
   [*] --> Pending : order created
-  Pending --> Confirmed : payment success
-  Pending --> Cancelled : timeout/cancel
+  Pending --> Confirmed : payment succeeds
+  Pending --> Cancelled : timeout or cancellation
   Confirmed --> Shipped : dispatched
   Shipped --> Delivered : received
   Delivered --> [*]
   Cancelled --> [*]
 ```
 
-**Output files:** `order-states.mmd` + `order-states.png`
+Validate and report only `order-states.mmd` because no PNG, SVG, or PDF was requested.
 
----
+### Example 4: Explicit PNG export
 
-### Example 4: Cloud Architecture
-
-**User prompt:**
-> Draw a simple service architecture for an API
-
-**Generated `.mmd`:**
+**User prompt:** “Create a simple API service architecture and export it as PNG.”
 
 ```mermaid
 architecture-beta
@@ -250,67 +226,17 @@ architecture-beta
   gateway:B --> T:cache
 ```
 
-**Output files:** `api-architecture.mmd` + `api-architecture.png`
+Validate `api-architecture.mmd`, export `api-architecture.png`, run the PNG self-check, and report both paths.
 
-## Export Commands
+## Common mistakes
 
-### Option 1: Local Export (mmdc)
-
-Requires `mmdc` installed locally. Best for offline use.
-
-```bash
-# PNG (recommended: 2048px wide, white background)
-mmdc -i diagram.mmd -o diagram.png -w 2048 --backgroundColor white
-
-# PNG with theme — valid -t values: default | dark | neutral | forest
-# (`base` is NOT a valid -t value; it only works inside a %%{init: {'theme':'base'}}%% directive)
-mmdc -i diagram.mmd -o diagram.png -w 2048 --backgroundColor white --theme neutral
-
-# SVG
-mmdc -i diagram.mmd -o diagram.svg
-
-# PDF
-mmdc -i diagram.mmd -o diagram.pdf
-```
-
-### Option 2: Kroki API (No Install Required)
-
-Use [Kroki](https://kroki.io) when `mmdc` is not available. No local dependencies needed.
-
-```bash
-# SVG via Kroki
-curl -X POST -H "Content-Type: text/plain" --data-binary @diagram.mmd https://kroki.io/mermaid/svg -o diagram.svg
-
-# PNG via Kroki
-curl -X POST -H "Content-Type: text/plain" --data-binary @diagram.mmd https://kroki.io/mermaid/png -o diagram.png
-
-# PDF is NOT supported by Kroki for Mermaid — POSTing to /mermaid/pdf returns
-# HTTP 400 ("Unsupported output format: pdf for mermaid. Must be one of png or svg").
-# For PDF, use the local mmdc path instead:  mmdc -i diagram.mmd -o diagram.pdf
-```
-
-**Kroki advantages:**
-
-- No local installation required
-- Works on any system with `curl`
-- Supports 20+ diagram types (PlantUML, GraphViz, D2, etc.)
-
-**When to use Kroki:**
-
-- `mmdc` installation fails
-- Quick one-off diagrams
-- CI/CD pipelines without Node.js
-
-## Common Mistakes
-
-| Mistake | Fix |
-| --------- | ----- |
-| `mmdc` not found | `npm install -g @mermaid-js/mermaid-cli` |
-| `mmdc` error `Could not find Chrome` | Install the headless browser: `npx puppeteer browsers install chrome-headless-shell` (or use Kroki) |
-| Kroki PDF fails with HTTP 400 | Kroki does PNG/SVG only for Mermaid; use local `mmdc` for PDF |
-| Valid diagram reported "invalid" by `mmdc` | The error is a Chrome/puppeteer setup failure, not a syntax error — don't rewrite correct `.mmd`; fix the browser or validate via Kroki |
-| Wrong arrow in sequence | Use `->>` for request, `-->>` for response |
-| Special chars in label | Wrap in quotes: `A["Label: value"]` |
-| Blank/small output | Add `-w 2048` flag |
-| Participant order wrong | Declare `participant` explicitly at top |
-| Subgraph name with spaces | Wrap in quotes: `subgraph "My Layer"` |
+| Mistake | Correct behavior |
+| --- | --- |
+| `mmdc` is missing | Let the helper try the already-local CLI container, then loopback Kroki |
+| Local `mmdc` cannot find Chrome/Puppeteer | Treat it as backend unavailability; do not rewrite valid Mermaid source |
+| PDF reaches the Kroki fallback | Report PDF unavailable unless local or containerized `mmdc` works |
+| Wrong sequence arrow | Use `->>` for requests and `-->>` for responses |
+| Special characters in a flowchart label | Quote the label, for example `A["Label: value"]` |
+| Participant order is wrong | Declare every participant explicitly at the top |
+| Subgraph name contains spaces | Quote it, for example `subgraph "My Layer"` |
+| Output is cramped or has a poor aspect ratio | Change direction, shorten labels, or group nodes before re-validating |

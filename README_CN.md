@@ -1,18 +1,14 @@
-# mermaid-skill —— 从代码到图片,一步到位
+# mermaid-skill —— 始终校验，仅限本地渲染
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/Agents365-ai/mermaid-skill?style=flat&logo=github)](https://github.com/Agents365-ai/mermaid-skill/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/Agents365-ai/mermaid-skill?style=flat&logo=github)](https://github.com/Agents365-ai/mermaid-skill/network/members)
-[![Latest Release](https://img.shields.io/github/v/release/Agents365-ai/mermaid-skill?logo=github)](https://github.com/Agents365-ai/mermaid-skill/releases/latest)
-[![Last Commit](https://img.shields.io/github/last-commit/Agents365-ai/mermaid-skill?logo=github)](https://github.com/Agents365-ai/mermaid-skill/commits/main)
+[![GitHub stars](https://img.shields.io/github/stars/robertonetresults/mermaid-skill?style=flat&logo=github)](https://github.com/robertonetresults/mermaid-skill/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/robertonetresults/mermaid-skill?style=flat&logo=github)](https://github.com/robertonetresults/mermaid-skill/network/members)
+[![Last Commit](https://img.shields.io/github/last-commit/robertonetresults/mermaid-skill?logo=github)](https://github.com/robertonetresults/mermaid-skill/commits/main)
 
-[![SkillsMP](https://img.shields.io/badge/SkillsMP-listed-1f6feb)](https://skillsmp.com/skills/agents365-ai-mermaid-skill-skills-mermaid-skill-skill-md)
-[![ClawHub](https://img.shields.io/badge/ClawHub-listed-ff6b35)](https://clawhub.ai/agents365-ai/mermaid-pro-skill)
-[![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-plugin-8a2be2)](https://github.com/Agents365-ai/365-skills)
 [![Agent Skills](https://img.shields.io/badge/Agent%20Skills-兼容-2ea44f)](https://agentskills.io)
-[English](README.md) · **中文** · [📖 在线文档](https://agents365-ai.github.io/mermaid-skill/zh.html)
+[English](README.md) · **中文** · [文档](docs/zh.html)
 
-一个把自然语言转成 `.mmd` 源码、导出前自动校验语法,再通过 `mmdc` CLI 或 Kroki HTTP API 渲染为 PNG / SVG / PDF 的技能。支持 **Claude Code、Cursor、Copilot、OpenClaw、Codex、Hermes** 等任何兼容 [Agent Skills](https://agentskills.io) 规范的 agent。
+一个把自然语言转成始终经过校验的 `.mmd` 源码的技能。只有用户明确指定格式时才导出 PNG / SVG / PDF，并且只使用本地 `mmdc`、禁用网络的本地 Mermaid CLI 容器或仅监听回环地址的 Kroki 容器 API。
 
 <p align="center">
   <img src="assets/example.png" width="900" alt="微服务架构 —— 来自一条自然语言提示词">
@@ -21,12 +17,13 @@
 ## ✨ 核心亮点
 
 - **17+ 种图表类型** —— 流程图、时序图、类图、ER、状态图、甘特、饼图、Git 图、C4 上下文、思维导图等,全部自动布局(无需 x/y 坐标)
-- **校验优先的工作流** —— 每个 `.mmd` 都先解析再导出,坏图永远不会变成 PNG
+- **始终校验** —— 即使不导出，每个 `.mmd` 也执行“修复并重新校验”循环
 - **视觉自检 + 评审循环** —— 读取导出的 PNG,捕捉自动布局也防不住的可读性/排版缺陷(标签被截断、过于拥挤、方向不当),自动修复(≤2 轮),再根据你的反馈迭代(≤5 轮)
-- **两套后端,一个技能** —— 本地 `mmdc` 质量最佳,Kroki HTTP API 作为零安装备选(只要 `curl`)
+- **企业安全的本地后端** —— 本地 `mmdc`、本地 Mermaid CLI 容器、仅回环地址 Kroki
+- **按需导出** —— 只有用户明确指定格式时才创建持久化 PNG / SVG / PDF
 - **文本源码 = 友好版本管理** —— `.mmd` 是纯文本,在 PR 里 diff 清晰,可直接嵌入 GitHub / GitLab README
 - **主动触发** —— 讨论架构、API 流程、状态机时自动激活(中英文关键词都支持)
-- **多智能体、零配置** —— 单个 SKILL.md,无 MCP,无后台 daemon(可选的 `npx` 安装器需要 Node,技能本身不需要)
+- **禁用公共渲染服务** —— 图表源码和产物始终留在本地环境
 
 ## 🖼️ 示例
 
@@ -60,37 +57,52 @@ Mermaid 自动布局 17+ 种类型 —— 下面每张都由一句提示词生�
 
 ## 🚀 安装
 
-### 1. 选择导出后端
+### 1. 准备至少一个本地校验后端
 
 | 选项 | 命令 | 适用场景 |
 | --- | --- | --- |
-| **A —— 本地 `mmdc`** | `npm install -g @mermaid-js/mermaid-cli && mmdc --version` | 质量最佳、可控主题、离线使用 |
-| **B —— Kroki API** | `curl --version` | 无需安装、无需 Node、CI/CD 流水线 |
+| **A —— 本地 `mmdc`** | `mmdc --version` | 已安装且 Chromium 可用时优先 |
+| **B —— 本地 CLI 容器** | 预加载 `minlag/mermaid-cli:latest` | 禁用网络的第二选择，技能绝不拉取镜像 |
+| **C —— 本地 Kroki 容器** | 回环地址上的网关 + Mermaid companion | PNG/SVG 的最终选择，绝不调用公共 API |
 
-技能会先尝试 `mmdc`,失败时自动回退到 Kroki。
+技能按上述顺序探测后端，绝不自动安装软件、拉取镜像或调用托管渲染器。配置见[本地渲染说明](skills/mermaid-skill/reference/LOCAL-RENDERING.md)。
 
-### 2. 安装技能
-
-```bash
-# 任意 Agent(Claude Code、Cursor、Copilot 等)
-npx skills add Agents365-ai/365-skills -g
-```
-
-```text
-# Claude Code 插件市场
-> /plugin marketplace add Agents365-ai/365-skills
-> /plugin install mermaid
-```
+### 2. 克隆本 fork 并为 Codex 安装
 
 ```bash
-# 手动安装
-git clone https://github.com/Agents365-ai/mermaid-skill.git \
-  ~/.claude/skills/mermaid-skill
+git clone git@github.com:robertonetresults/mermaid-skill.git
+cd mermaid-skill
+./manage-skill.sh install
 ```
 
-同时索引于 [SkillsMP](https://skillsmp.com/skills/agents365-ai-mermaid-skill-skills-mermaid-skill-skill-md) 与 [ClawHub](https://clawhub.ai/agents365-ai/mermaid-pro-skill)。
+如果不能使用 SSH，可改用 `https://github.com/robertonetresults/mermaid-skill.git`。默认安装到 `${CODEX_HOME:-$HOME/.codex}/skills/mermaid-skill`；请保留 clone，它也是后续更新的来源。
 
-**更新:** `/plugin update mermaid`(Claude Code)、`skills update mermaid-skill`(SkillsMP)、`clawhub update mermaid-pro-skill`(OpenClaw),或 `git pull`(手动安装)。
+### 3. 更新或卸载
+
+```bash
+# 从当前本地 checkout 重新安装（不访问网络）
+./manage-skill.sh update
+
+# 仅快进更新配置的 Git remote，然后重新安装
+./manage-skill.sh update --pull
+
+# 只删除由此安装器管理的安装目录
+./manage-skill.sh uninstall
+```
+
+脚本拒绝覆盖或删除没有所有权标记的现有目录。
+
+### 其他兼容 Agent Skills 的智能体
+
+本 skill 使用开放的 Agent Skills 目录格式。可以安装到跨客户端的用户目录、项目目录，或指定其他 agent 的 skills 目录：
+
+```bash
+./manage-skill.sh install --agents
+./manage-skill.sh install --project /path/to/project
+./manage-skill.sh install --destination /path/to/agent/skills
+```
+
+更新和卸载时使用相同的目标选项。不同 agent 的发现目录可能不同，因此只保证 Codex；安装后请重启 agent 或开始新会话。
 
 ## ⚡ 快速开始
 
@@ -102,7 +114,7 @@ Gateway 调 Auth Service,Auth Service 查 User DB、校验密码哈希,
 然后把签名后的 JWT 沿路径返回给 Client。同时画出密码错误的失败分支。
 ```
 
-技能会自动选图表类型、写 `.mmd` 源码、用 `mmdc`(或 Kroki)校验、导出你想要的格式,并报告输出路径。
+技能会写入 `.mmd` 源码并始终校验；语法错误会修复后重新校验。除非你明确要求 PNG、SVG 或 PDF，否则只报告源码路径。
 
 ## 🧩 支持的图表类型
 
@@ -133,7 +145,7 @@ Gateway 调 Auth Service,Auth Service 查 User DB、校验密码哈希,
   <img src="assets/workflow_cn.png" width="700" alt="校验优先的工作流">
 </p>
 
-幕后流程:**检查依赖(`mmdc` 或 Kroki)→ 选图表类型 → 写 `.mmd` → 校验语法(出错则修复并重新校验)→ 导出 PNG/SVG/PDF → 视觉自检渲染图并自动修复可读性/排版缺陷(≤2 轮)→ 根据你的反馈评审循环(≤5 轮)→ 报告输出路径**。详见 [docs/workflow_CN.md](docs/workflow_CN.md)。
+幕后流程:**写入 `.mmd` → 选择允许的本地后端 → 校验语法 → 出错则修复并重新校验 → 报告已校验源码，或仅导出明确要求的格式 → 检查所请求的产物 → 报告路径**。详见 [docs/workflow_CN.md](docs/workflow_CN.md)。
 
 ## 🆚 对比
 
@@ -142,11 +154,11 @@ Gateway 调 Auth Service,Auth Service 查 User DB、校验密码哈希,
 | 功能 | 原生智能体 | mermaid-skill |
 | --- | --- | --- |
 | 写 Mermaid 语法 | ✅ 内置 | ✅ 配示例 + 参考文档引导 |
-| 导出前校验 | ❌ 默默导出坏图 | ✅ 必经步骤,出错自动重试 |
+| 源码校验 | ❌ 未导出时经常跳过 | ✅ 始终执行，出错自动重试 |
 | 导出后自检 | ❌ 从不看渲染结果 | ✅ 视觉读取 PNG,自动修复排版/可读性(≤2 轮) |
 | 迭代评审循环 | ❌ 手动重新提示 | ✅ 定向 `.mmd` 编辑,5 轮安全阀 |
-| 导出为 PNG / SVG / PDF | ❌ 手动跑 `mmdc` | ✅ 自动选用一种后端 |
-| 零安装备选 | ❌ | ✅ Kroki API 只要 `curl` |
+| 导出为 PNG / SVG / PDF | ❌ 手动执行 | ✅ 仅在明确要求格式时执行 |
+| 仅本地备选 | ❌ | ✅ 禁用网络的 CLI 容器，再到回环 Kroki |
 | 主动触发 | ❌ 必须显式要求 | ✅ 3+ 组件、API 流程、状态机自动触发 |
 | 中英双语触发 | ❌ 仅英文 | ✅ 中英关键词都支持 |
 | 图表类型引导 | 一般化 | ✅ 17+ 类型表 + 可复制模板 |
