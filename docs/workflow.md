@@ -4,55 +4,42 @@
 
 ## How It Works
 
-This skill follows a validation-first workflow:
+Every generated source is validated. Export remains an explicit opt-in.
 
-![Skill Workflow](../assets/workflow.png)
-
-<details>
-<summary>View Mermaid source</summary>
+![Local-only validation workflow](../assets/workflow.png)
 
 ```mermaid
-flowchart TD
-  Start([User requests diagram]):::input --> CheckDeps{Check deps}:::decision
-  CheckDeps -->|mmdc available| UseMmdc[Use mmdc locally]:::process
-  CheckDeps -->|mmdc unavailable| UseKroki[Use Kroki API]:::process
-  UseMmdc --> PickType
-  UseKroki --> PickType
-  PickType[Pick diagram type]:::process --> Generate[Generate .mmd file]:::process
-  Generate --> Validate{Validate syntax}:::decision
-  Validate -->|Error| Fix[Fix .mmd file]:::warning
+flowchart LR
+  Start([User requests diagram]) --> Generate[Generate .mmd source]
+  Generate --> Local{Local mmdc works?}
+  Local -->|Yes| Validate[Validate with temporary SVG]
+  Local -->|No| Container{Local CLI container works?}
+  Container -->|Yes| Validate
+  Container -->|No| Kroki{Loopback Kroki works?}
+  Kroki -->|Yes| Validate
+  Kroki -->|No| Unvalidated([Report source as not validated])
+  Validate --> Result{Syntax valid?}
+  Result -->|No| Fix[Fix .mmd source]
   Fix --> Validate
-  Validate -->|Pass| Export[Export PNG/SVG/PDF]:::process
-  Export --> Report([Report output paths]):::output
-
-  classDef input fill:#d4edda,stroke:#28a745,color:#155724
-  classDef process fill:#cce5ff,stroke:#007bff,color:#004085
-  classDef decision fill:#fff3cd,stroke:#ffc107,color:#856404
-  classDef warning fill:#f8d7da,stroke:#dc3545,color:#721c24
-  classDef output fill:#e2d5f1,stroke:#6f42c1,color:#4a235a
+  Result -->|Yes| Export{Format explicitly requested?}
+  Export -->|No| Source([Report validated .mmd])
+  Export -->|Yes| Render[Export requested formats only]
+  Render --> Report([Report output paths])
 ```
 
-**Color legend:** 🟢 Input | 🔵 Process | 🟡 Decision | 🔴 Warning | 🟣 Output
+The temporary validation SVG is deleted automatically. Persistent PNG, SVG, and PDF files are created only when the user explicitly requests those formats.
 
-</details>
+## Skill Structure
 
-## File Structure
-
-```
-mermaid-skill/
-├── SKILL.md              # Main skill instructions
-├── reference/
-│   ├── FLOWCHART.md      # Flowchart syntax & examples
-│   ├── SEQUENCE.md       # Sequence diagram syntax
-│   ├── CLASS-ER.md       # Class & ER diagram syntax
-│   └── OTHER-TYPES.md    # State, Gantt, Git, Pie, Mindmap, C4
-├── assets/
-│   ├── example.mmd       # Example: microservices architecture
-│   ├── example.png
-│   ├── workflow.mmd      # Example: workflow (English)
-│   ├── workflow.png
-│   ├── workflow_cn.mmd   # Example: workflow (Chinese)
-│   └── workflow_cn.png
-├── README.md             # English docs (default)
-└── README_CN.md          # Chinese docs
+```text
+skills/mermaid-skill/
+├── SKILL.md
+├── scripts/
+│   └── render-mermaid.sh
+└── reference/
+    ├── LOCAL-RENDERING.md
+    ├── FLOWCHART.md
+    ├── SEQUENCE.md
+    ├── CLASS-ER.md
+    └── OTHER-TYPES.md
 ```

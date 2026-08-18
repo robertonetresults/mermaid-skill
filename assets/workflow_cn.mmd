@@ -1,22 +1,20 @@
-flowchart TD
-  Start([用户请求图表]):::input --> CheckDeps{检查依赖}:::decision
-
-  CheckDeps -->|mmdc 可用| UseMmdc[使用 mmdc 本地导出]:::process
-  CheckDeps -->|mmdc 不可用| UseKroki[使用 Kroki API]:::process
-
-  UseMmdc --> PickType
-  UseKroki --> PickType
-
-  PickType[选择图表类型]:::process --> Generate[生成 .mmd 文件]:::process
-
-  Generate --> Validate{验证语法}:::decision
-
-  Validate -->|错误| Fix[修复 .mmd 文件]:::warning
+flowchart LR
+  Start([用户请求图表]):::input --> Generate[生成 .mmd 源码]:::process
+  Generate --> Local{本地 mmdc 可用?}:::decision
+  Local -->|是| Validate[使用临时 SVG 校验]:::process
+  Local -->|否| Container{本地 CLI 容器可用?}:::decision
+  Container -->|是| Validate
+  Container -->|否| Kroki{回环 Kroki 可用?}:::decision
+  Kroki -->|是| Validate
+  Kroki -->|否| Unvalidated([报告源码未校验]):::warning
+  Validate --> Result{语法有效?}:::decision
+  Result -->|否| Fix[修复 .mmd 源码]:::warning
   Fix --> Validate
-
-  Validate -->|通过| Export[导出 PNG/SVG/PDF]:::process
-
-  Export --> Report([报告输出路径]):::output
+  Result -->|是| Export{明确要求格式?}:::decision
+  Export -->|否| Source([报告已校验 .mmd]):::output
+  Export -->|是| Render[仅导出指定格式]:::process
+  Render --> Review[检查所请求的产物]:::process
+  Review --> Report([报告输出路径]):::output
 
   classDef input fill:#d4edda,stroke:#28a745,color:#155724
   classDef process fill:#cce5ff,stroke:#007bff,color:#004085

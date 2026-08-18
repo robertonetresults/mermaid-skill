@@ -7,19 +7,19 @@
 | Feature | This Skill | Native Claude Code | Other Skills | MCP Server |
 | --------- | ----------- | ------------------- | -------------- | ------------ |
 | **Write Mermaid syntax** | Guided by examples | Built-in capability | Varies | Varies |
-| **Validation before export** | Required step | No validation loop | Often skipped | Varies |
-| **Export to PNG/SVG/PDF** | Automatic | Manual — user must ask | Usually one method | Web only |
-| **Zero-install fallback** | Kroki needs only curl | No fallback | Requires install | Requires setup |
+| **Source validation** | Always required, with fix/re-validate | No validation loop | Often skipped | Varies |
+| **Export to PNG/SVG/PDF** | Explicit opt-in | Manual — user must ask | Usually one method | Often web-only |
+| **Local fallback chain** | Local CLI → local container → loopback Kroki | No fallback | Requires setup | Varies |
 | **Proactive triggering** | Auto-triggers for 3+ components | Only when explicitly asked | Manual only | Manual |
 | **Chinese language support** | Chinese keyword triggers | No keyword triggers | English only | English only |
-| **End-to-end workflow** | Generate → Validate → Export → Report | Generate only | Partial | Partial |
+| **End-to-end workflow** | Generate → Validate → optional export → Report | Generate only | Partial | Partial |
 | **Progressive disclosure** | Syntax in separate files | N/A | All inline | N/A |
 
 **Key advantages over native Claude Code:**
 
-- **Complete pipeline** — Claude Code can write Mermaid, but stops at `.mmd`. This skill adds validation, export, and error recovery automatically
-- **Catches errors early** — validation loop prevents broken diagrams from being exported
-- **Flexible export** — local mmdc or Kroki API fallback (no install needed)
+- **Always-valid source** — validation and error recovery run even when no image was requested
+- **No implicit export** — persistent PNG/SVG/PDF output is created only for explicitly named formats
+- **Local-only backends** — local `mmdc`, a network-isolated local CLI container, then loopback Kroki
 - **Proactive diagramming** — auto-triggers when discussing architecture, not just when you ask for a diagram
 
 ## What This Skill Can Do
@@ -45,6 +45,8 @@
 | **Wardley Maps** | Business strategy / value chains | Build vs. buy analysis |
 
 ### Output Formats
+
+Output formats are opt-in. Without an explicit format request, the skill returns only the validated `.mmd` source.
 
 - **PNG** — High resolution (2048px), white background, multiple themes
 - **SVG** — Scalable vector, perfect for docs

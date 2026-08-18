@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>mermaid-skill — From Code to Image, Automatically</title>
-  <meta name="description" content="Claude Code / OpenClaw / SkillsMP skill that generates Mermaid diagrams, validates syntax, and exports to PNG/SVG/PDF via mmdc or the Kroki API.">
+  <title>mermaid-skill — Validated Diagrams, Local-Only Rendering</title>
+  <meta name="description" content="Generate always-validated Mermaid source and optionally export PNG/SVG/PDF using local-only rendering backends.">
   <meta name="theme-color" content="#0d1117">
   <link rel="canonical" href="https://agents365-ai.github.io/mermaid-skill/">
   <link rel="alternate" hreflang="zh" href="https://agents365-ai.github.io/mermaid-skill/zh.html">
   <link rel="alternate" hreflang="en" href="https://agents365-ai.github.io/mermaid-skill/">
-  <meta property="og:title" content="mermaid-skill — From Code to Image, Automatically">
-  <meta property="og:description" content="Claude Code / OpenClaw / SkillsMP skill that generates Mermaid diagrams, validates syntax, and exports to PNG/SVG/PDF via mmdc or the Kroki API.">
+  <meta property="og:title" content="mermaid-skill — Validated Diagrams, Local-Only Rendering">
+  <meta property="og:description" content="Generate always-validated Mermaid source and optionally export PNG/SVG/PDF using local-only rendering backends.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://agents365-ai.github.io/mermaid-skill/">
   <meta property="og:image" content="https://raw.githubusercontent.com/Agents365-ai/mermaid-skill/main/assets/example.png">
@@ -193,9 +193,9 @@ footer a:hover { color: var(--text); }
   <main id="main-content">
   <div class="hero">
     <div class="container">
-      <div class="hero-badge">Validation-first workflow + Kroki fallback</div>
+      <div class="hero-badge">Always validated + local-only rendering</div>
       <h1>mermaid-<span>skill</span></h1>
-      <p>Generate, validate, and export Mermaid diagrams to PNG / SVG / PDF — with a validation loop that catches syntax errors before export.</p>
+      <p>Generate and always validate Mermaid source. Export PNG / SVG / PDF only when explicitly requested, using local-only backends.</p>
       <div class="hero-install">
         <code id="install-cmd">/plugin marketplace add Agents365-ai/365-skills</code>
         <button class="copy-btn" data-copied="Copied!" onclick="copyInstall()">Copy</button>
@@ -217,27 +217,27 @@ footer a:hover { color: var(--text); }
   <section>
     <div class="container">
       <h2 class="section-title">Why This Skill</h2>
-      <p class="section-sub">Claude Code can write Mermaid — this skill closes the loop with validation, export, and proactive triggering.</p>
+      <p class="section-sub">Every source is validated with fix-and-revalidate; persistent image export remains explicit and local.</p>
       <div class="features-grid">
         <div class="feature-card">
   <div class="feature-icon">📊</div>
-  <h3>11+ Diagram Types</h3>
+  <h3>17+ Diagram Types</h3>
   <p>Flowchart, sequence, class, ER, state, Gantt, pie, git graph, C4 context, mind map — each with copy-paste syntax templates.</p>
 </div>
 <div class="feature-card">
   <div class="feature-icon">🔍</div>
   <h3>Validation Loop</h3>
-  <p>Catches syntax errors before export. The skill validates the .mmd file and fixes problems in place, so broken diagrams never leak through.</p>
+  <p>Validates every .mmd, even without export, and repeats after each syntax correction.</p>
 </div>
 <div class="feature-card">
   <div class="feature-icon">🎨</div>
   <h3>PNG / SVG / PDF</h3>
-  <p>Auto-export at 2048px PNG (white background, multiple themes), scalable SVG, or print-ready PDF — pick once and the skill remembers.</p>
+  <p>Creates persistent PNG, SVG, or PDF output only when the user explicitly requests that format.</p>
 </div>
 <div class="feature-card">
   <div class="feature-icon">🚀</div>
-  <h3>Zero-Install Fallback</h3>
-  <p>No mmdc? The skill auto-falls back to the Kroki API. <code>curl</code> is the only requirement.</p>
+  <h3>Local-Only Fallbacks</h3>
+  <p>Uses local <code>mmdc</code>, then a network-isolated local CLI container, then loopback-only Kroki.</p>
 </div>
 <div class="feature-card">
   <div class="feature-icon">⚡</div>

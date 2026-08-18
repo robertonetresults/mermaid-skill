@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>mermaid-skill — 从代码到图片,一步到位</title>
-  <meta name="description" content="Claude Code / OpenClaw / SkillsMP 技能,生成 Mermaid 图表、校验语法,通过 mmdc 或 Kroki API 导出 PNG/SVG/PDF。">
+  <title>mermaid-skill — 始终校验，仅限本地渲染</title>
+  <meta name="description" content="生成始终经过校验的 Mermaid 源码，并仅在明确要求时通过本地后端导出 PNG/SVG/PDF。">
   <meta name="theme-color" content="#0d1117">
   <link rel="canonical" href="https://agents365-ai.github.io/mermaid-skill/zh.html">
   <link rel="alternate" hreflang="zh" href="https://agents365-ai.github.io/mermaid-skill/zh.html">
   <link rel="alternate" hreflang="en" href="https://agents365-ai.github.io/mermaid-skill/">
-  <meta property="og:title" content="mermaid-skill — 从代码到图片,一步到位">
-  <meta property="og:description" content="Claude Code / OpenClaw / SkillsMP 技能,生成 Mermaid 图表、校验语法,通过 mmdc 或 Kroki API 导出 PNG/SVG/PDF。">
+  <meta property="og:title" content="mermaid-skill — 始终校验，仅限本地渲染">
+  <meta property="og:description" content="生成始终经过校验的 Mermaid 源码，并仅在明确要求时通过本地后端导出 PNG/SVG/PDF。">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://agents365-ai.github.io/mermaid-skill/zh.html">
   <meta property="og:image" content="https://raw.githubusercontent.com/Agents365-ai/mermaid-skill/main/assets/example.png">
@@ -193,9 +193,9 @@ footer a:hover { color: var(--text); }
   <main id="main-content">
   <div class="hero">
     <div class="container">
-      <div class="hero-badge">校验优先工作流 + Kroki 备选</div>
+      <div class="hero-badge">始终校验 + 仅限本地渲染</div>
       <h1>mermaid-<span>skill</span></h1>
-      <p>生成、校验并导出 Mermaid 图表为 PNG / SVG / PDF —— 导出前自动校验语法,杜绝坏图。</p>
+      <p>生成并始终校验 Mermaid 源码；只有明确要求时才使用本地后端导出 PNG / SVG / PDF。</p>
       <div class="hero-install">
         <code id="install-cmd">/plugin marketplace add Agents365-ai/365-skills</code>
         <button class="copy-btn" data-copied="已复制!" onclick="copyInstall()">复制</button>
@@ -217,27 +217,27 @@ footer a:hover { color: var(--text); }
   <section>
     <div class="container">
       <h2 class="section-title">为什么选这个技能</h2>
-      <p class="section-sub">Claude Code 能写 Mermaid —— 本技能补齐校验、导出与主动触发的全流程。</p>
+      <p class="section-sub">每份源码都执行修复并重新校验；持久化图片必须明确要求且只在本地生成。</p>
       <div class="features-grid">
         <div class="feature-card">
   <div class="feature-icon">📊</div>
-  <h3>11+ 种图表类型</h3>
+  <h3>17+ 种图表类型</h3>
   <p>流程图、时序图、类图、ER、状态图、甘特、饼图、Git 图、C4 上下文、思维导图 —— 每种都有可复制的语法模板。</p>
 </div>
 <div class="feature-card">
   <div class="feature-icon">🔍</div>
   <h3>校验循环</h3>
-  <p>导出前捕获语法错误。技能会校验 .mmd 并就地修复,坏图永远不会被发出去。</p>
+  <p>即使不导出也会校验每个 .mmd，并在语法修复后重新校验。</p>
 </div>
 <div class="feature-card">
   <div class="feature-icon">🎨</div>
   <h3>PNG / SVG / PDF</h3>
-  <p>自动导出 2048px PNG(白底、多主题)、可缩放 SVG、可打印 PDF —— 选一次,技能记住。</p>
+  <p>只有用户明确指定格式时才创建持久化 PNG、SVG 或 PDF。</p>
 </div>
 <div class="feature-card">
   <div class="feature-icon">🚀</div>
-  <h3>零安装备选</h3>
-  <p>没装 mmdc?技能自动切到 Kroki API,只要有 <code>curl</code> 就行。</p>
+  <h3>仅本地备选</h3>
+  <p>依次使用本地 <code>mmdc</code>、禁用网络的本地 CLI 容器、仅回环地址的 Kroki。</p>
 </div>
 <div class="feature-card">
   <div class="feature-icon">⚡</div>

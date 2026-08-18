@@ -1,4 +1,4 @@
-# mermaid-skill — From Code to Image, Automatically
+# mermaid-skill — Validated Diagrams, Local-Only Rendering
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/Agents365-ai/mermaid-skill?style=flat&logo=github)](https://github.com/Agents365-ai/mermaid-skill/stargazers)
@@ -12,7 +12,7 @@
 [![Agent Skills](https://img.shields.io/badge/Agent%20Skills-compatible-2ea44f)](https://agentskills.io)
 **English** · [中文](README_CN.md) · [📖 Online Docs](https://agents365-ai.github.io/mermaid-skill/)
 
-A skill that turns natural-language requests into `.mmd` source, validates syntax before export, and renders to PNG / SVG / PDF via the `mmdc` CLI or the Kroki HTTP API. Works with **Claude Code, Cursor, Copilot, OpenClaw, Codex, Hermes**, and any agent compatible with the [Agent Skills](https://agentskills.io) format.
+A skill that turns natural-language requests into always-validated `.mmd` source. PNG / SVG / PDF export is opt-in and uses only local `mmdc`, a network-isolated local Mermaid CLI container, or a loopback-only Kroki container API.
 
 <p align="center">
   <img src="assets/example.png" width="900" alt="Microservices architecture — generated from a single natural-language prompt">
@@ -21,12 +21,13 @@ A skill that turns natural-language requests into `.mmd` source, validates synta
 ## ✨ Highlights
 
 - **17+ diagram types** — flowchart, sequence, class, ER, state, Gantt, pie, git graph, C4 context, mind map, and more, all with automatic layout (no x/y coordinates)
-- **Validation-first workflow** — every `.mmd` is parsed before export, so broken syntax never leaks into a PNG
+- **Always validated** — every `.mmd` goes through a fix-and-revalidate loop, even when no export is requested
 - **Vision self-check + review loop** — reads the exported PNG to catch readability/layout defects auto-layout can't prevent (clipped labels, cramped density, wrong orientation), auto-fixes (≤2 rounds), then iterates with you on feedback (≤5 rounds)
-- **Two backends, one skill** — local `mmdc` for best quality, Kroki HTTP API as zero-install fallback (only `curl` required)
+- **Enterprise-safe local backends** — local `mmdc`, then a local Mermaid CLI container, then loopback-only Kroki
+- **Opt-in export** — persistent PNG / SVG / PDF files are created only when the user explicitly names the format
 - **Text source = version-control friendly** — `.mmd` is plain text, diffs cleanly in PRs, and embeds directly in GitHub / GitLab READMEs
 - **Proactive triggering** — auto-activates when discussing architecture, API flows, or state machines (English + Chinese keywords)
-- **Multi-agent, zero-config** — one SKILL.md, no MCP server, no background daemon (the optional `npx` installer needs Node, the skill itself does not)
+- **No public rendering services** — diagram source and artifacts remain inside the local environment
 
 ## 🖼️ Examples
 
@@ -60,14 +61,15 @@ Full feature matrix in [docs/features.md](docs/features.md). Source `.mmd` files
 
 ## 🚀 Installation
 
-### 1. Pick an export backend
+### 1. Prepare at least one local validation backend
 
 | Option | Command | When to use |
 | --- | --- | --- |
-| **A — Local `mmdc`** | `npm install -g @mermaid-js/mermaid-cli && mmdc --version` | Best quality, full theme control, offline use |
-| **B — Kroki API** | `curl --version` | No install, no Node, CI/CD pipelines |
+| **A — Local `mmdc`** | `mmdc --version` | First choice when already installed with working Chromium |
+| **B — Local CLI container** | Preload `minlag/mermaid-cli:latest` | Network-isolated fallback; never pulled by the skill |
+| **C — Local Kroki containers** | Gateway + Mermaid companion on loopback | Final PNG/SVG fallback; never a public API |
 
-The skill probes `mmdc` first and falls back to Kroki automatically.
+The skill probes these backends in order. It never installs packages, pulls images, or calls a hosted renderer. See [local rendering setup](skills/mermaid-skill/reference/LOCAL-RENDERING.md).
 
 ### 2. Install the skill
 
@@ -103,7 +105,7 @@ verifies the password hash, and returns a signed JWT back through the
 gateway to the client. Show the failure path for an invalid password too.
 ```
 
-The skill picks the diagram type, writes the `.mmd` source, validates with `mmdc` (or Kroki), exports to your chosen format, and reports the output paths.
+The skill writes the `.mmd` source and always validates it, fixing and re-validating syntax errors. It reports only the source unless you explicitly request PNG, SVG, or PDF.
 
 ## 🧩 Supported Diagram Types
 
@@ -134,7 +136,7 @@ Per-type syntax references live in [`skills/mermaid-skill/reference/`](skills/me
   <img src="assets/workflow.png" width="700" alt="Validation-first workflow">
 </p>
 
-Behind the scenes: **check deps (`mmdc` or Kroki) → pick diagram type → write `.mmd` → validate syntax (fix & re-validate on error) → export PNG/SVG/PDF → vision self-check the render and auto-fix readability/layout defects (≤2 rounds) → review loop on your feedback (≤5 rounds) → report output paths**. Walkthrough in [docs/workflow.md](docs/workflow.md).
+Behind the scenes: **write `.mmd` → select a permitted local backend → validate syntax → fix and re-validate on error → report the validated source, or export only explicitly requested formats → inspect requested output → report paths**. Walkthrough in [docs/workflow.md](docs/workflow.md).
 
 ## 🆚 Comparison
 
@@ -143,11 +145,11 @@ Behind the scenes: **check deps (`mmdc` or Kroki) → pick diagram type → writ
 | Feature | Native agent | mermaid-skill |
 | --- | --- | --- |
 | Writes Mermaid syntax | ✅ inline | ✅ guided by examples + reference files |
-| Validation before export | ❌ exports broken `.mmd` silently | ✅ required step, retries on error |
+| Validation of source | ❌ often skipped without export | ✅ always required, retries on error |
 | Self-check after export | ❌ never looks at the render | ✅ vision reads the PNG, auto-fixes layout/readability (≤2 rounds) |
 | Iterative review loop | ❌ manual re-prompt | ✅ targeted `.mmd` edits, 5-round safety valve |
-| Export to PNG / SVG / PDF | ❌ manual, you run `mmdc` yourself | ✅ automatic, one of two backends |
-| Zero-install fallback | ❌ | ✅ Kroki API needs only `curl` |
+| Export to PNG / SVG / PDF | ❌ manual | ✅ only when the format is explicitly requested |
+| Local-only fallback | ❌ | ✅ network-isolated CLI container, then loopback Kroki |
 | Proactive triggering | ❌ only when explicitly asked | ✅ auto-triggers on 3+ components, API flows, state machines |
 | Bilingual triggers | ❌ English only | ✅ English + Chinese keywords |
 | Diagram-type guidance | generic | ✅ 17+ type table with copy-paste templates |
