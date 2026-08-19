@@ -4,8 +4,8 @@
 [![GitHub stars](https://img.shields.io/github/stars/robertonetresults/mermaid-skill?style=flat&logo=github)](https://github.com/robertonetresults/mermaid-skill/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/robertonetresults/mermaid-skill?style=flat&logo=github)](https://github.com/robertonetresults/mermaid-skill/network/members)
 [![Last Commit](https://img.shields.io/github/last-commit/robertonetresults/mermaid-skill?logo=github)](https://github.com/robertonetresults/mermaid-skill/commits/main)
-
 [![Agent Skills](https://img.shields.io/badge/Agent%20Skills-compatible-2ea44f)](https://agentskills.io)
+
 [Documentation](docs/index.html)
 
 A skill that turns natural-language requests into always-validated `.mmd` source. PNG / SVG / PDF export is opt-in and uses only local `mmdc`, a network-isolated local Mermaid CLI container, or a loopback-only Kroki container API.
