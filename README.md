@@ -6,7 +6,7 @@
 [![Last Commit](https://img.shields.io/github/last-commit/robertonetresults/mermaid-skill?logo=github)](https://github.com/robertonetresults/mermaid-skill/commits/main)
 
 [![Agent Skills](https://img.shields.io/badge/Agent%20Skills-compatible-2ea44f)](https://agentskills.io)
-**English** · [中文](README_CN.md) · [Documentation](docs/index.html)
+[Documentation](docs/index.html)
 
 A skill that turns natural-language requests into always-validated `.mmd` source. PNG / SVG / PDF export is opt-in and uses only local `mmdc`, a network-isolated local Mermaid CLI container, or a loopback-only Kroki container API.
 
@@ -22,7 +22,7 @@ A skill that turns natural-language requests into always-validated `.mmd` source
 - **Enterprise-safe local backends** — local `mmdc`, then a local Mermaid CLI container, then loopback-only Kroki
 - **Opt-in export** — persistent PNG / SVG / PDF files are created only when the user explicitly names the format
 - **Text source = version-control friendly** — `.mmd` is plain text, diffs cleanly in PRs, and embeds directly in GitHub / GitLab READMEs
-- **Proactive triggering** — auto-activates when discussing architecture, API flows, or state machines (English + Chinese keywords)
+- **Proactive triggering** — auto-activates when discussing architecture, API flows, or state machines
 - **No public rendering services** — diagram source and artifacts remain inside the local environment
 
 ## 🖼️ Examples
@@ -161,7 +161,6 @@ Behind the scenes: **write `.mmd` → select a permitted local backend → valid
 | Export to PNG / SVG / PDF | ❌ manual | ✅ only when the format is explicitly requested |
 | Local-only fallback | ❌ | ✅ network-isolated CLI container, then loopback Kroki |
 | Proactive triggering | ❌ only when explicitly asked | ✅ auto-triggers on 3+ components, API flows, state machines |
-| Bilingual triggers | ❌ English only | ✅ English + Chinese keywords |
 | Diagram-type guidance | generic | ✅ 17+ type table with copy-paste templates |
 
 ## 🎯 When to use (and when not to)

@@ -7,7 +7,6 @@
   <meta name="description" content="Generate always-validated Mermaid source and optionally export PNG/SVG/PDF using local-only rendering backends.">
   <meta name="theme-color" content="#0d1117">
   <link rel="canonical" href="https://agents365-ai.github.io/mermaid-skill/">
-  <link rel="alternate" hreflang="zh" href="https://agents365-ai.github.io/mermaid-skill/zh.html">
   <link rel="alternate" hreflang="en" href="https://agents365-ai.github.io/mermaid-skill/">
   <meta property="og:title" content="mermaid-skill — Validated Diagrams, Local-Only Rendering">
   <meta property="og:description" content="Generate always-validated Mermaid source and optionally export PNG/SVG/PDF using local-only rendering backends.">
@@ -48,12 +47,6 @@ nav {
 nav .logo { font-weight: 700; font-size: 16px; color: var(--text); }
 nav .logo span { color: var(--accent); }
 nav .nav-right { display: flex; align-items: center; gap: 16px; }
-.lang-switch {
-  font-size: 14px; font-weight: 500; color: var(--text-muted);
-  padding: 4px 12px; border: 1px solid var(--border); border-radius: 6px;
-  transition: all 0.2s;
-}
-.lang-switch:hover { color: var(--text); border-color: var(--text-muted); text-decoration: none; }
 .theme-btn {
   background: none; border: 1px solid var(--border); color: var(--text-muted);
   border-radius: 6px; padding: 4px 10px; cursor: pointer; font-size: 16px;
@@ -174,7 +167,6 @@ footer a:hover { color: var(--text); }
   <nav role="navigation" aria-label="Main">
     <div class="logo">mermaid-<span>skill</span></div>
     <div class="nav-right">
-      <a href="zh.html" class="lang-switch">中文</a>
       <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle dark/light theme">&#x1F319;</button>
     </div>
   </nav>
@@ -229,11 +221,6 @@ footer a:hover { color: var(--text); }
   <div class="feature-icon">⚡</div>
   <h3>Proactive Triggering</h3>
   <p>Auto-activates when explaining systems with 3+ components, APIs, state machines, or architectures — even when you don't say 'diagram'.</p>
-</div>
-<div class="feature-card">
-  <div class="feature-icon">🌐</div>
-  <h3>Bilingual Triggers</h3>
-  <p>Handles English and Chinese diagramming requests — '画一个时序图' triggers just like 'create a sequence diagram'.</p>
 </div>
       </div>
     </div>

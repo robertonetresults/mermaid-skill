@@ -11,7 +11,6 @@
 | **Export to PNG/SVG/PDF** | Explicit opt-in | Manual — user must ask | Usually one method | Often web-only |
 | **Local fallback chain** | Local CLI → local container → loopback Kroki | No fallback | Requires setup | Varies |
 | **Proactive triggering** | Auto-triggers for 3+ components | Only when explicitly asked | Manual only | Manual |
-| **Chinese language support** | Chinese keyword triggers | No keyword triggers | English only | English only |
 | **End-to-end workflow** | Generate → Validate → optional export → Report | Generate only | Partial | Partial |
 | **Progressive disclosure** | Syntax in separate files | N/A | All inline | N/A |
 
@@ -58,4 +57,3 @@ The skill activates when you:
 
 - Ask for diagrams explicitly: *"create a flowchart"*, *"draw architecture"*
 - Explain complex systems: *"how does authentication work"* (3+ components)
-- Use Chinese: *"画一个时序图"*, *"架构图"*
