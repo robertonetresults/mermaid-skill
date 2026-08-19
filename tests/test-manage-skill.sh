@@ -39,8 +39,10 @@ test_codex_lifecycle() {
   [[ -x "$target/scripts/render-mermaid.sh" ]] || fail "render helper lost executable permission"
 
   printf 'tampered\n' > "$target/SKILL.md"
+  printf 'tampered\n' > "$target/LICENSE"
   run_manager update >/dev/null
   LC_ALL=C grep -Fq '# Mermaid Diagrams' "$target/SKILL.md" || fail "update did not refresh the installed skill"
+  assert_license "$target"
 
   run_manager uninstall >/dev/null
   assert_no_path "$target"

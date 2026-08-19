@@ -68,6 +68,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 [[ -d "$SOURCE_DIR" && -f "$SOURCE_DIR/SKILL.md" ]] || fail "skill source not found: $SOURCE_DIR"
+[[ -f "$SCRIPT_DIR/LICENSE" ]] || fail "license file not found: $SCRIPT_DIR/LICENSE"
 
 case "$TARGET_MODE" in
   codex) TARGET_PARENT="${CODEX_HOME:-$HOME/.codex}/skills" ;;
@@ -118,6 +119,7 @@ stage_skill() {
   mkdir -p -- "$TARGET_PARENT"
   STAGE_DIR=$(mktemp -d "$TARGET_PARENT/.${SKILL_NAME}.stage.XXXXXX")
   cp -a -- "$SOURCE_DIR/." "$STAGE_DIR/"
+  cp -a -- "$SCRIPT_DIR/LICENSE" "$STAGE_DIR/LICENSE"
   printf 'managed-by=robertonetresults/mermaid-skill\n' > "$STAGE_DIR/$MARKER_NAME"
 }
 
