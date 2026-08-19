@@ -16,6 +16,12 @@ assert_file() {
   [[ -f "$1" ]] || fail "expected file: $1"
 }
 
+assert_license() {
+  local target=$1
+  assert_file "$target/LICENSE"
+  cmp -s "$REPO_ROOT/LICENSE" "$target/LICENSE" || fail "installed license differs from repository license: $target/LICENSE"
+}
+
 assert_no_path() {
   [[ ! -e "$1" && ! -L "$1" ]] || fail "unexpected path: $1"
 }
@@ -28,6 +34,7 @@ test_codex_lifecycle() {
   local target="$TEST_DIR/codex/skills/mermaid-skill"
   run_manager install >/dev/null
   assert_file "$target/SKILL.md"
+  assert_license "$target"
   assert_file "$target/.managed-by-robertonetresults-mermaid-skill"
   [[ -x "$target/scripts/render-mermaid.sh" ]] || fail "render helper lost executable permission"
 
@@ -47,14 +54,17 @@ test_cross_agent_targets() {
 
   run_manager install --agents >/dev/null
   assert_file "$agents_target/SKILL.md"
+  assert_license "$agents_target"
   run_manager uninstall --agents >/dev/null
 
   run_manager install --project "$project" >/dev/null
   assert_file "$project/.agents/skills/mermaid-skill/SKILL.md"
+  assert_license "$project/.agents/skills/mermaid-skill"
   run_manager uninstall --project "$project" >/dev/null
 
   run_manager install --destination "$custom" >/dev/null
   assert_file "$custom/mermaid-skill/SKILL.md"
+  assert_license "$custom/mermaid-skill"
   run_manager uninstall --destination "$custom" >/dev/null
 }
 

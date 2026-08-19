@@ -14,6 +14,19 @@ A skill that turns natural-language requests into always-validated `.mmd` source
   <img src="assets/example.png" width="900" alt="Microservices architecture — generated from a single natural-language prompt">
 </p>
 
+## 🗺️ Origin and functional differences
+
+This repository is a security-focused fork of the original [Agents365-ai/mermaid-skill](https://github.com/Agents365-ai/mermaid-skill), created and copyrighted by Agents365-ai. Both projects are distributed under the [MIT License](LICENSE).
+
+| Area | Original skill | This fork |
+| --- | --- | --- |
+| Source validation | Validates as part of the export workflow | Always validates `.mmd`, including source-only requests |
+| Persistent export | Produces PNG/SVG/PDF in the normal workflow | Exports only formats explicitly requested by the user |
+| Rendering backends | Local `mmdc` or a hosted Kroki API | Local `mmdc`, network-isolated local CLI container, or loopback-only Kroki |
+| Dependency handling | Setup may require installing `mmdc`, Chrome, or using `curl` | Never installs packages or pulls container images implicitly |
+| Installation lifecycle | General agent/plugin installation paths | Ownership-checked `install`, `update`, and `uninstall` for Codex and custom targets |
+| Documentation scope | Multilingual documentation and language-specific trigger aliases | English documentation without language-specific aliases |
+
 ## ✨ Highlights
 
 - **17+ diagram types** — flowchart, sequence, class, ER, state, Gantt, pie, git graph, C4 context, mind map, and more, all with automatic layout (no x/y coordinates)
