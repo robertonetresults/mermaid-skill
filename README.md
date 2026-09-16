@@ -24,7 +24,6 @@ This repository is a security-focused fork of the original [Agents365-ai/mermaid
 | Persistent export | Produces PNG/SVG/PDF in the normal workflow | Exports only formats explicitly requested by the user |
 | Rendering backends | Local `mmdc` or a hosted Kroki API | Local `mmdc`, network-isolated local CLI container, or loopback-only Kroki |
 | Dependency handling | Setup may require installing `mmdc`, Chrome, or using `curl` | Never installs packages or pulls container images implicitly |
-| Installation lifecycle | General agent/plugin installation paths | Ownership-checked `install`, `update`, and `uninstall` for Codex and custom targets |
 | Documentation scope | Multilingual documentation and language-specific trigger aliases | English documentation without language-specific aliases |
 
 ## ✨ Highlights
@@ -80,42 +79,37 @@ Full feature matrix in [docs/features.md](docs/features.md). Source `.mmd` files
 
 The skill probes these backends in order. It never installs packages, pulls images, or calls a hosted renderer. See [local rendering setup](skills/mermaid-skill/reference/LOCAL-RENDERING.md).
 
-### 2. Clone this fork and install for Codex
+### 2. Install globally for Codex
 
 ```bash
-git clone git@github.com:robertonetresults/mermaid-skill.git
-cd mermaid-skill
-./manage-skill.sh install
+npx skills@latest add robertonetresults/mermaid-skill \
+  --skill mermaid-skill --global --agent codex --yes
 ```
 
-If SSH access is unavailable, clone `https://github.com/robertonetresults/mermaid-skill.git` instead. The default destination is `${CODEX_HOME:-$HOME/.codex}/skills/mermaid-skill`; keep the clone because it remains the source for future updates.
+This requires Node.js and `npx` for installation and management only. The skill itself does not require Node.js unless your chosen local rendering backend does.
 
-### 3. Update or uninstall
+### 3. List, update, or remove
 
 ```bash
-# Reinstall from the current local checkout (no network)
-./manage-skill.sh update
-
-# Fast-forward the configured Git remote, then reinstall
-./manage-skill.sh update --pull
-
-# Remove only the installation owned by this installer
-./manage-skill.sh uninstall
+npx skills@latest list --global --agent codex
+npx skills@latest update mermaid-skill --global --yes
+npx skills@latest remove mermaid-skill --global --agent codex --yes
 ```
 
-The script refuses to overwrite or remove an existing directory that does not contain its ownership marker.
+The CLI records this fork as the installation source for later updates.
 
-### Other skills-compatible agents
+### Other skills-compatible agents and project installs
 
-The skill follows the open Agent Skills directory format. Install it in the cross-client user or project convention, or provide an agent-specific directory:
+Run the interactive installer and choose the agents and scope you want:
 
 ```bash
-./manage-skill.sh install --agents
-./manage-skill.sh install --project /path/to/project
-./manage-skill.sh install --destination /path/to/agent/skills
+npx skills@latest add robertonetresults/mermaid-skill
 ```
 
-Use the same target option with `update` and `uninstall`. Agent discovery paths vary, so only Codex is guaranteed; restart the agent or begin a new session after installation.
+Omit `--global` for project-level installation, or use `--agent` to target supported agents non-interactively. See the [`skills` CLI documentation](https://www.npmjs.com/package/skills) for the complete option list.
+
+> [!IMPORTANT]
+> When migrating from a release installed with the legacy repository script, uninstall that managed copy before switching to the `skills` CLI. The CLI does not adopt installations created by the old installer.
 
 ## ⚡ Quick Start
 

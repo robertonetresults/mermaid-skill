@@ -18,7 +18,7 @@ Create version-control-friendly `.mmd` files with automatic layout. Always valid
 
 - Never send diagram source, labels, configuration, or rendered artifacts to a public service.
 - Never call `kroki.io`, `mermaid.live`, another hosted renderer, or an arbitrary HTTP endpoint.
-- Never install a package, pull a container image, or use `npx` as an implicit fallback.
+- Never install a rendering package, pull a rendering container image, or use `npx` to acquire a rendering backend as an implicit fallback.
 - Reject Mermaid source that references external resources or URLs before validation or export.
 - Accept Kroki only over plain HTTP on loopback (`127.0.0.1`, `localhost`, or `::1`). Do not follow redirects or use a proxy.
 - Run the Mermaid CLI container with networking disabled and pulling disabled.

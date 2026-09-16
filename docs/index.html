@@ -177,7 +177,7 @@ footer a:hover { color: var(--text); }
       <h1>mermaid-<span>skill</span></h1>
       <p>Generate and always validate Mermaid source. Export PNG / SVG / PDF only when explicitly requested, using local-only backends.</p>
       <div class="hero-install">
-        <code id="install-cmd">git clone https://github.com/robertonetresults/mermaid-skill.git &amp;&amp; cd mermaid-skill &amp;&amp; ./manage-skill.sh install</code>
+        <code id="install-cmd">npx skills@latest add robertonetresults/mermaid-skill --skill mermaid-skill --global --agent codex --yes</code>
         <button class="copy-btn" data-copied="Copied!" onclick="copyInstall()">Copy</button>
       </div>
       <div class="hero-links">
@@ -228,19 +228,17 @@ footer a:hover { color: var(--text); }
   <section>
     <div class="container">
       <h2 class="section-title">Install</h2>
-      <p class="section-sub">Codex is the default target; no marketplace or portal is required.</p>
-      <div class="install-block"><pre># Clone this fork and install for Codex
-git clone git@github.com:robertonetresults/mermaid-skill.git
-cd mermaid-skill
-./manage-skill.sh install
+      <p class="section-sub">Install directly from this GitHub fork with the standard Skills CLI.</p>
+      <div class="install-block"><pre># Install globally for Codex
+npx skills@latest add robertonetresults/mermaid-skill --skill mermaid-skill --global --agent codex --yes
 
-# Update from the checkout, optionally pulling first
-./manage-skill.sh update
-./manage-skill.sh update --pull
+# List, update, or remove
+npx skills@latest list --global --agent codex
+npx skills@latest update mermaid-skill --global --yes
+npx skills@latest remove mermaid-skill --global --agent codex --yes
 
-# Cross-agent convention or uninstall
-./manage-skill.sh install --agents
-./manage-skill.sh uninstall</pre></div>
+# Interactive install for another agent or project
+npx skills@latest add robertonetresults/mermaid-skill</pre></div>
     </div>
   </section>
 
